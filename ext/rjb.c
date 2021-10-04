@@ -792,8 +792,8 @@ static void rv2jobject(JNIEnv* jenv, VALUE val, jvalue* jv, const char* psig, in
 #else
 	    arg.i = FIX2LONG(val);
 #endif
-	    jv->l = (*jenv)->NewObject(jenv, jpcvt[idx].klass,
-				       jpcvt[idx].ctr_id, arg);
+	    jv->l = (*jenv)->NewObjectA(jenv, jpcvt[idx].klass,
+				       jpcvt[idx].ctr_id, &arg);
 	}
 	else
 	{
@@ -839,8 +839,8 @@ static void rv2jobject(JNIEnv* jenv, VALUE val, jvalue* jv, const char* psig, in
 #if HAVE_LONG_LONG
             case T_BIGNUM:
                 arg.j = rb_big2ll(val);
-                jv->l = (*jenv)->NewObject(jenv, jpcvt[PRM_LONG].klass,
-				       jpcvt[PRM_LONG].ctr_id, arg);
+                jv->l = (*jenv)->NewObjectA(jenv, jpcvt[PRM_LONG].klass,
+				       jpcvt[PRM_LONG].ctr_id, &arg);
                 break;
 #endif
             case T_OBJECT:
@@ -2361,7 +2361,7 @@ jclass rjb_find_class_by_name(JNIEnv* jenv, const char* name)
         char* binname = ALLOCA_N(char, strlen(name) + 32);
         strcpy(binname, name);
         v.l = (*jenv)->NewStringUTF(jenv, jniname2java(binname));
-        cls = (*jenv)->CallObjectMethod(jenv, url_loader, rjb_load_class, v);
+        cls = (*jenv)->CallObjectMethodA(jenv, url_loader, rjb_load_class, &v);
         (*jenv)->DeleteLocalRef(jenv, v.l);
     }
     else
@@ -2605,7 +2605,7 @@ static jobject conv_jarname_to_url(JNIEnv* jenv, VALUE jarname)
 #endif
     arg.l = (*jenv)->NewStringUTF(jenv, urlp);
     rjb_check_exception(jenv, 0);
-    url = (*jenv)->NewObject(jenv, j_url, url_new, arg);
+    url = (*jenv)->NewObjectA(jenv, j_url, url_new, &arg);
     rjb_check_exception(jenv, 0);
     return url;
 }
@@ -2685,7 +2685,7 @@ static VALUE rjb_s_add_jar(VALUE self, VALUE jarname)
             for (i = 0; i < count; i++)
             {
                 v.l = conv_jarname_to_url(jenv, rb_ary_entry(jarname, i));
-                (*jenv)->CallObjectMethod(jenv, url_loader, url_add_url, v);
+                (*jenv)->CallObjectMethodA(jenv, url_loader, url_add_url, &v);
                 rjb_check_exception(jenv, 0);
                 (*jenv)->DeleteLocalRef(jenv, v.l);
             }
@@ -2693,7 +2693,7 @@ static VALUE rjb_s_add_jar(VALUE self, VALUE jarname)
         else
         {
             v.l = conv_jarname_to_url(jenv, jarname);
-            (*jenv)->CallObjectMethod(jenv, url_loader, url_add_url, v);
+            (*jenv)->CallObjectMethodA(jenv, url_loader, url_add_url, &v);
             rjb_check_exception(jenv, 0);
             (*jenv)->DeleteLocalRef(jenv, v.l);
         }
